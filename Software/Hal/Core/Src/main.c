@@ -19,14 +19,21 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "can.h"
-#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "OLED.h"
+#include "MPU6050.h"
+#include "Serial.h"
+#include "Control.h"
+#include "LED.h"
+#include "KEY.h"
+#include "MyCAN.h"
+#include "dm_motor_ctrl.h"
+#include "dm_motor_drv.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,7 +54,9 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+int16_t AX, AY, AZ, GX, GY, GZ;
+float data[5] = {0,0,0,0,0};
+motor_t *m1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -78,7 +87,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+	__HAL_AFIO_REMAP_SWJ_NOJTAG();
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -91,21 +100,70 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_CAN_Init();
-  MX_I2C1_Init();
-  MX_I2C2_Init();
   MX_USART1_UART_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
+	OLED_Init();
+	MPU6050_Init();
+	Serial_Init();
+	MyCAN_Init();
 	HAL_TIM_Base_Start_IT(&htim1);
+	
+	m1 = &motor[Motor1];
+	m1->id = 0x01;
+	m1->ctrl.mode = mit_mode;
+	m1->para.pos = 0;
+	m1->para.vel = 0;
+	m1->para.tor = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+		if(Key_Check(KEY_1, KEY_DOWN)){
+			LED1_ON();
+			dm_motor_enable(m1);
+		}else{
+			LED1_OFF();
+		}
+		
+		if(Key_Check(KEY_2, KEY_DOWN)){
+			LED2_ON();
+		}else{
+			LED2_OFF();
+		}
+		
+		if(Key_Check(KEY_3, KEY_DOWN)){
+			LED3_ON();
+			dm_motor_disable(m1);
+		}else{
+			LED3_OFF();
+		}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+		if (Serial_RxFlag == 1){
+			Control_Rx(data);
+		}
+		
+		MPU6050_GetData(&AX, &AY, &AZ, &GX, &GY, &GZ);
+		
+		GY = -GY; 
+    GY -= 114; 
+		AX = -AX;
+    AZ = -AZ;
+		
+		OLED_ShowString(0, 0, "Hello", OLED_6X8);
+		
+		OLED_Printf(64, 32, OLED_6X8, "%05d", AX);
+		OLED_Printf(64, 40, OLED_6X8, "%05d",	AY);
+		OLED_Printf(64, 48, OLED_6X8, "%05d", AZ);
+		OLED_Printf(96, 32, OLED_6X8, "%05d", GX);
+		OLED_Printf(96, 40, OLED_6X8, "%05d", GY);
+		OLED_Printf(96, 48, OLED_6X8, "%05d", GZ);
+		
+		OLED_Update();
   }
   /* USER CODE END 3 */
 }
@@ -152,10 +210,16 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if(htim -> Instance == TIM1)
-	{
-	
-	}
+    if (htim->Instance == TIM1)
+    {
+        Key_Tick();   // 每产生一次定时器中断，执行按键扫描
+    }
+}
+
+void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
+{
+    // 调用电机驱动接收处理函数
+    Motor_CAN_RxHandler();
 }
 /* USER CODE END 4 */
 
