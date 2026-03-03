@@ -3,3 +3,6 @@ This is a project based on tutorials from Bilibili, it have different mechanical
 
 related libaries: https://jiangxiekeji.com/download.html
                   https://gitee.com/kit-miao/damiao
+
+Updates:
+2026/3/4 implement HAL library
