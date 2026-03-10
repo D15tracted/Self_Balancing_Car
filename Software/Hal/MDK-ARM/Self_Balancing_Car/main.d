@@ -47,3 +47,5 @@ self_balancing_car\main.o: ../User/KEY.h
 self_balancing_car\main.o: ../User/MyCAN.h
 self_balancing_car\main.o: ../User/dm_motor_ctrl.h
 self_balancing_car\main.o: ../User/dm_motor_drv.h
+self_balancing_car\main.o: ../User/PID.h
+self_balancing_car\main.o: C:\Users\leo\AppData\Local\Keil_v5\ARM\ARM_Compiler_5.06u7\Bin\..\include\string.h

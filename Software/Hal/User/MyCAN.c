@@ -73,7 +73,7 @@ void MyCAN_Transmit(uint32_t ID, uint8_t Length, uint8_t *Data)
             while (!(hcan.Instance->TSR & CAN_TSR_RQCP0))
             {
                 timeout++;
-                if (timeout > 1000000) break;   // 超时退出
+                if (timeout > 1000) break;   // 超时退出
             }
             // 清除完成标志（写1清除）
             hcan.Instance->TSR |= CAN_TSR_RQCP0;
@@ -82,7 +82,7 @@ void MyCAN_Transmit(uint32_t ID, uint8_t Length, uint8_t *Data)
             while (!(hcan.Instance->TSR & CAN_TSR_RQCP1))
             {
                 timeout++;
-                if (timeout > 1000000) break;
+                if (timeout > 1000) break;
             }
             hcan.Instance->TSR |= CAN_TSR_RQCP1;
             break;
@@ -90,7 +90,7 @@ void MyCAN_Transmit(uint32_t ID, uint8_t Length, uint8_t *Data)
             while (!(hcan.Instance->TSR & CAN_TSR_RQCP2))
             {
                 timeout++;
-                if (timeout > 1000000) break;
+                if (timeout > 1000) break;
             }
             hcan.Instance->TSR |= CAN_TSR_RQCP2;
             break;
