@@ -5,4 +5,4 @@ related libaries: https://jiangxiekeji.com/download.html
                   https://gitee.com/kit-miao/damiao
 
 Updates:
-2026/3/4 implement HAL library
+2026/3/10 implement HAL library
